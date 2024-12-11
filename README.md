@@ -5,7 +5,7 @@ Check CI/CD Status: [![CI](https://github.com/nogibjj/kim_seijung_project5_sql_c
 #### Author: Seijung Kim (sk591)
 
 ## Project Overview
-This project demonstrates how to create a Databricks Pipeline to manage and analyze music streaming data effectively. The dataset contains information about passengers aboard the Titanic, including personal details such as age, sex, and passenger class, along with their survival status. It is commonly used in data science for practice, providing insights into factors that might influence survival rates.. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
+This project demonstrates how to create a Databricks Pipeline for ETL (Extract, Transform, Load) pipeline and CRUD querying. The dataset contains information about passengers aboard the Titanic, including personal details such as age, sex, and passenger class, along with their survival status. It is commonly used in data science for practice, providing insights into factors that might influence survival rates.. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
 
 ## Requirements/Deliverables
 * Create a data pipeline using Databricks
@@ -16,7 +16,7 @@ This project demonstrates how to create a Databricks Pipeline to manage and anal
 ## Dataset
 # Titanic Database Schema
 
-This project uses the Titanic passenger dataset, which is commonly used in data science for practice. The following table describes the columns and data types for the `TitanicDB.db` SQLite database. The dataset was obtained from: https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv
+This project uses the Titanic passenger dataset, which is commonly used in data science for practice. The following table describes the columns and data types. The dataset was obtained from: https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv
 
 | Column       | Data Type | Description                                                        |
 |--------------|-----------|--------------------------------------------------------------------|
@@ -35,10 +35,16 @@ This project uses the Titanic passenger dataset, which is commonly used in data 
 
 
 ## CRUD functions for interacting with the dataset:
-
 - create: Adds a new record to the DataFrame.
 - read: Displays a specified number of records from the DataFrame.
 - update: Updates the artist_name based on PassengerId.
 - delete: Deletes a record from the DataFrame based on PassengerId.
+
+
+## How to Run the Databricks Pipeline
+1. Navigate to **Workflows** and select your job.
+2. Click **Run Now** to execute the pipeline.
+3. Monitor task execution:
+- The pipeline will run in sequential order: `Extract` > `Load` > `Query`.
 
 
