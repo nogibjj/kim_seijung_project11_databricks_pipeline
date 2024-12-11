@@ -5,7 +5,7 @@ Check CI/CD Status: [![CI](https://github.com/nogibjj/kim_seijung_project5_sql_c
 #### Author: Seijung Kim (sk591)
 
 ## Project Overview
-This project demonstrates how to create a Databricks Pipeline to manage and analyze music streaming data effectively. The dataset includes information about songs, artists, playlists, and streaming statistics across platforms like Spotify, Apple Music, Deezer, and Shazam. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
+This project demonstrates how to create a Databricks Pipeline to manage and analyze music streaming data effectively. The dataset contains information about passengers aboard the Titanic, including personal details such as age, sex, and passenger class, along with their survival status. It is commonly used in data science for practice, providing insights into factors that might influence survival rates.. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
 
 ## Requirements/Deliverables
 * Create a data pipeline using Databricks
@@ -34,5 +34,11 @@ This project uses the Titanic passenger dataset, which is commonly used in data 
 | Embarked     | TEXT      | Port of embarkation (C = Cherbourg, Q = Queenstown, S = Southampton) |
 
 
+## CRUD functions for interacting with the dataset:
+
+- create: Adds a new record to the DataFrame.
+- read: Displays a specified number of records from the DataFrame.
+- update: Updates the artist_name based on PassengerId.
+- delete: Deletes a record from the DataFrame based on PassengerId.
 
 
