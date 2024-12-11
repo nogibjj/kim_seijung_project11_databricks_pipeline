@@ -1,11 +1,11 @@
-Check CI/CD Status:
+Check CI/CD Status: [![CI](https://github.com/nogibjj/kim_seijung_project5_sql_crud/actions/workflows/cicd.yml/badge.svg)](https://github.com/nogibjj/kim_seijung_project5_sql_crud/actions/workflows/cicd.yml)
 
 # Mini-project #11
 #### Repo Title: Data Pipeline with Databricks
 #### Author: Seijung Kim (sk591)
 
-## Overview
-This project aims to package a simple Python program into a Rust-based Command Line Interface (CLI) that the user can install and use. This command line tool built with Rust allows manipulating an SQLite database. Using this tool you can load raw data from a csv and perform CRUD queries on the stored data. The project demonstrates a complete CI/CD pipeline with GitHub Actions. A pre-built binary artifact is available through the GitHub Actions workflow, which can be downloaded from the GitHub Actions Artifacts. For details about how to use the tool, follow the `User Guide` in this README.
+## Project Overview
+This project demonstrates how to create a Databricks Pipeline to manage and analyze music streaming data effectively. The dataset includes information about songs, artists, playlists, and streaming statistics across platforms like Spotify, Apple Music, Deezer, and Shazam. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
 
 ## Requirements/Deliverables
 * Create a data pipeline using Databricks
@@ -13,17 +13,26 @@ This project aims to package a simple Python program into a Rust-based Command L
 * Databricks notebook or script
 * Document or video demonstrating the pipeline
 
-# Deliverables
-The project includes the files below:
+## Dataset
+# Titanic Database Schema
 
-* `.devcontainer` (with `.devcontainer.json` and `Dockerfile`)
-* `.github/workflows` for GitHub Actions that integrates Rust CICD workflow and generates a binary artifact you can execute as CLI.
-* the `data` folder has the Titanic 
-* In the sqlite folder, you will see the 
-* In `test_main.py`, we check if all ETL and SQL queries have ran successfully.
-* In `mylib`, there are three scripts:
-`extract.py`: extracts a dataset from a URL.
-`query.py`: contains functions including join, aggregation, and sorting query operations.
-`transform_load.py`: loads the transformed data into a Databricks warehouse table using Python's SQL module.
+This project uses the Titanic passenger dataset, which is commonly used in data science for practice. The following table describes the columns and data types for the `TitanicDB.db` SQLite database. The dataset was obtained from: https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv
+
+| Column       | Data Type | Description                                                        |
+|--------------|-----------|--------------------------------------------------------------------|
+| PassengerId  | INTEGER   | Unique identifier for each passenger                              |
+| Survived     | INTEGER   | Survival status (0 = No, 1 = Yes)                                 |
+| Pclass       | INTEGER   | Passenger class (1 = 1st, 2 = 2nd, 3 = 3rd)                       |
+| Name         | TEXT      | Full name of the passenger                                        |
+| Sex          | TEXT      | Gender of the passenger                                           |
+| Age          | REAL      | Age of the passenger (in years)                                   |
+| SibSp        | INTEGER   | Number of siblings or spouses aboard                              |
+| Parch        | INTEGER   | Number of parents or children aboard                              |
+| Ticket       | TEXT      | Ticket number                                                     |
+| Fare         | REAL      | Fare paid by the passenger                                        |
+| Cabin        | TEXT      | Cabin number (if available)                                       |
+| Embarked     | TEXT      | Port of embarkation (C = Cherbourg, Q = Queenstown, S = Southampton) |
+
+
 
 
