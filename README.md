@@ -40,9 +40,9 @@ This project uses the Titanic passenger dataset, which is commonly used in data 
 - update: Updates the artist_name based on PassengerId.
 - delete: Deletes a record from the DataFrame based on PassengerId.
 
-## Databricks Workflow
-
-
+## Databricks Workflow Set Up
+There are three tasks for the ETL and querying set up in the pipeline.
+![Alt text](databricks.png)
 
 ## How to Run the Databricks Pipeline
 1. Navigate to **Workflows** and select your job.
