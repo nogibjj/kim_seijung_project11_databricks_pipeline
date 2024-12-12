@@ -1,6 +1,6 @@
 from mylib.log import init_log
-from mylib.transform_load import create_spark, load_data
-from mylib.transform_load import transform_data, save_data, query_data
+from mylib.transform_load import create_spark, load_data, transform_data, save_data
+from mylib.query import query_data
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
 
     # Create Spark session
     logger.info("Initializing Spark session...")
-    spark = create_spark("TransferETL")
+    spark = create_spark("TitanicPipeline")
 
     # Load data
     logger.info("Loading data...")
@@ -21,18 +21,17 @@ def main():
     transformed_data = transform_data(data)
 
     # Save transformed data
-    logger.info("Saving data...")
+    logger.info("Saving transformed data...")
     save_data(transformed_data)
 
-    # Query data
-    logger.info("Querying data...")
-    query_results = query_data(transformed_data, spark)
+    # Perform CRUD operations and queries
+    logger.info("Performing CRUD operations and queries...")
+    query_data()
 
     # Stop Spark session
+    logger.info("Stopping Spark session...")
     spark.stop()
     logger.info("Spark session completed!")
-
-    return
 
 
 if __name__ == "__main__":

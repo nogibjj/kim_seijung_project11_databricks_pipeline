@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 DATASET_PATH = "dbfs:/FileStore/skim_project11/titanic.csv"
 OUTPUT_PATH = "dbfs:/FileStore/skim_project11"
 
-def create_spark(app_name="ChessTransfersPipeline"):
+def create_spark(app_name="TitanicETL"):
     return SparkSession.builder.appName(app_name).getOrCreate()
 
 def load_data(spark, dataset=DATASET_PATH):
@@ -16,26 +16,25 @@ def load_data(spark, dataset=DATASET_PATH):
     return df
 
 def transform_data(df):
-    """Perform transformations on the data."""
+    """Perform transformations on the Titanic data."""
     logging.info("Transforming data...")
 
-    # Rename columns
-    transformed_df = (
-        df.withColumnRenamed("ID", "player_id")
-          .withColumnRenamed("Federation", "federation")
-          .withColumnRenamed("Form.Fed", "former_fed")
-          .withColumnRenamed("Transfer Date", "transfer_date")
-    )
+    # Handle missing values
+    transformed_df = df.fillna({
+        "Age": 0,  # Replace missing ages with 0
+        "Cabin": "Unknown"  # Replace missing cabin with "Unknown"
+    })
 
-    # Fill missing values
-    transformed_df = transformed_df.fillna({"former_fed": "UNKNOWN"})
+    # Optionally, create derived columns (e.g., family size)
+    transformed_df = transformed_df.withColumn("FamilySize", df["SibSp"] + df["Parch"] + 1)
+
     print("Data transformation complete:")
     transformed_df.show()
     return transformed_df
 
 def save_data(df, path=OUTPUT_PATH):
     temp_path = f"{path}_temp"
-    final_file = f"{path}/transformed_transfer.csv"
+    final_file = f"{path}/titanic_transformed.csv"
 
     # Coalesce to a single file
     df.coalesce(1).write.mode("overwrite").csv(temp_path, header=True)
