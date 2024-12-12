@@ -1,20 +1,9 @@
-import os
-from main import extract  # load, query
-
-# Constants for paths
-DATASET_PATH = "../data/titanic.csv"
-LOG_PATH = "log.md"
+import pytest
+from main import main
 
 
-def test_extract():
-    """Test the extract function."""
-    # Clean up before running the test
-    if os.path.exists(DATASET_PATH):
-        os.remove(DATASET_PATH)
+def test_spark_completion(caplog):
+    main()
 
-    # Execute extract function
-    dataset_path = extract()
-
-    # Check if the dataset was extracted successfully
-    assert dataset_path == DATASET_PATH
-    assert os.path.exists(DATASET_PATH)
+    # Assert that the "Spark session completed!" message is in the logs
+    assert "Spark session completed!" in caplog.text

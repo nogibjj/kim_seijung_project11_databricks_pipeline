@@ -1,80 +1,59 @@
-"""
-Transforms and Loads data into the Databricks database
-"""
-import os
-import csv
-from dotenv import load_dotenv
-from databricks import sql
+import logging
+from pyspark.sql import SparkSession
 
-def load(dataset="../data/titanic.csv"):
-    """Transforms and Loads Titanic data into the Databricks database"""
+# Constants for paths
+DATASET_PATH = "dbfs:/FileStore/skim_project11/titanic.csv"
+OUTPUT_PATH = "dbfs:/FileStore/skim_project11"
 
-    # Load environment variables from .env file
-    load_dotenv()
-    server_hostname = os.getenv("SERVER_HOSTNAME")
-    http_path = os.getenv("HTTP_PATH")
-    access_token = os.getenv("DATABRICKS_KEY")
-    
-    # Connect to Databricks SQL
-    with sql.connect(
-        server_hostname=server_hostname,
-        http_path=http_path,
-        access_token=access_token,
-    ) as connection:
-        c = connection.cursor()
-        
-        # Check and create table for Titanic if it doesn't exist
-        c.execute("SHOW TABLES IN default LIKE 'Titanic'")
-        result = c.fetchall()
-        if not result:
-            c.execute(
-                """
-                CREATE TABLE default.Titanic (
-                    PassengerId INTEGER,
-                    Survived INTEGER,
-                    Pclass INTEGER,
-                    Name STRING,
-                    Sex STRING,
-                    Age DOUBLE,
-                    SibSp INTEGER,
-                    Parch INTEGER,
-                    Ticket STRING,
-                    Fare DOUBLE,
-                    Cabin STRING,
-                    Embarked STRING
-                )
-                """
-            )
+def create_spark(app_name="ChessTransfersPipeline"):
+    return SparkSession.builder.appName(app_name).getOrCreate()
 
-        # Prepare data for insertion from CSV
-        data_to_insert = []
-        with open(dataset, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                data_to_insert.append((
-                    int(row['PassengerId']),
-                    int(row['Survived']),
-                    int(row['Pclass']),
-                    row['Name'],
-                    row['Sex'],
-                    float(row['Age']) if row['Age'] else None,
-                    int(row['SibSp']),
-                    int(row['Parch']),
-                    row['Ticket'],
-                    float(row['Fare']),
-                    row['Cabin'],
-                    row['Embarked']
-                ))
+def load_data(spark, dataset=DATASET_PATH):
+    logging.info(f"Loading data from: {dataset}")
+    df = spark.read.csv(dataset, header=True, inferSchema=True)
+    print("Data loaded successfully:")
+    df.show()
+    return df
 
-        # Insert data in bulk for efficiency
-        insert_query = """
-            INSERT INTO default.Titanic 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        c.executemany(insert_query, data_to_insert)
+def transform_data(df):
+    """Perform transformations on the data."""
+    logging.info("Transforming data...")
 
-    return "Success: Data Loaded into Databricks"
+    # Rename columns
+    transformed_df = (
+        df.withColumnRenamed("ID", "player_id")
+          .withColumnRenamed("Federation", "federation")
+          .withColumnRenamed("Form.Fed", "former_fed")
+          .withColumnRenamed("Transfer Date", "transfer_date")
+    )
 
+    # Fill missing values
+    transformed_df = transformed_df.fillna({"former_fed": "UNKNOWN"})
+    print("Data transformation complete:")
+    transformed_df.show()
+    return transformed_df
+
+def save_data(df, path=OUTPUT_PATH):
+    temp_path = f"{path}_temp"
+    final_file = f"{path}/transformed_transfer.csv"
+
+    # Coalesce to a single file
+    df.coalesce(1).write.mode("overwrite").csv(temp_path, header=True)
+
+    # Move the single file to the final location
+    files = dbutils.fs.ls(temp_path)
+    for file in files:
+        if file.path.endswith(".csv"):
+            dbutils.fs.mv(file.path, final_file)
+            break
+
+    # Clean up temporary directory
+    dbutils.fs.rm(temp_path, recurse=True)
+    print(f"Transformed data saved as: {final_file}")
 
 if __name__ == "__main__":
-    load()
+    logging.basicConfig(level=logging.INFO)
+    spark = create_spark()
+    raw_df = load_data(spark)
+    transformed_df = transform_data(raw_df)
+    save_data(transformed_df)

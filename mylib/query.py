@@ -1,126 +1,52 @@
-"""Query the Titanic dataset in Databricks and generate a log.md file"""
-
 import logging
-import os
-from dotenv import load_dotenv
-from databricks import sql
+from pyspark.sql import SparkSession
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("TitanicQuery")
+# Constants for paths
+INPUT_PATH = "dbfs:/FileStore/skim_project11/titanic_transformed.csv"
+OUTPUT_PATH = "dbfs:/FileStore/skim_project11"
+FINAL_FILE = "dbfs:/FileStore/skim_project11/summary.csv"
 
-# Function to load environment variables
-def get_env_variables():
-    """Load environment variables from .env file and return them"""
-    load_dotenv()  # Load environment variables from .env file
-    server_hostname = os.getenv("SERVER_HOSTNAME")
-    http_path = os.getenv("HTTP_PATH")
-    access_token = os.getenv("DATABRICKS_KEY")
+def create_spark(app_name="ChessTransfersQueries"):
+    return SparkSession.builder.appName(app_name).getOrCreate()
 
-    if not (server_hostname and http_path and access_token):
-        raise ValueError("One or more required environment variables are missing.")
-    
-    return server_hostname, access_token, http_path
+def query_data(input_path=INPUT_PATH, output_path=OUTPUT_PATH, final_file=FINAL_FILE):
+    spark = create_spark()
 
-# SQL Queries
-JOIN_QUERY = """
-    SELECT 
-        t.PassengerId, t.Name, t.Sex, t.Age, t.Embarked, 
-        p.PortName, p.Country
-    FROM default.Titanic t
-    JOIN default.Ports p 
-    ON t.Embarked = p.PortCode;
-"""
+    # Load the transformed data
+    logging.info(f"Loading transformed data from: {input_path}")
+    df = spark.read.csv(input_path, header=True, inferSchema=True)
+    print("Transformed data loaded:")
+    df.show()
 
-AGGREGATE_QUERY = """
-    SELECT Pclass, AVG(Age) AS AverageAge
-    FROM default.Titanic
-    GROUP BY Pclass;
-"""
+    # Create a temporary view for SQL queries
+    df.createOrReplaceTempView("transfer_view")
 
-SORT_QUERY = """
-    SELECT PassengerId, Name, Fare
-    FROM default.Titanic
-    ORDER BY Fare DESC;
-"""
+    # Query: Count transfers by federation
+    logging.info("Running query to count transfers by federation...")
+    transfer_count_df = spark.sql("""
+        SELECT federation, COUNT(*) AS transfer_count
+        FROM transfer_view
+        GROUP BY federation
+        ORDER BY transfer_count DESC
+    """)
+    print("Query results:")
+    transfer_count_df.show()
 
-# Function to execute SQL queries
-def execute_query(query):
-    """Executes a SQL query on the Databricks database"""
-    hostname, access_token, http_path = get_env_variables()
-    
-    try:
-        with sql.connect(
-            server_hostname=hostname,
-            http_path=http_path,
-            access_token=access_token,
-        ) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                result = cursor.fetchall()
-                logger.info("Query executed successfully.")
-                return result
-    except sql.DatabaseError as db_err:
-        logger.error(f"Database error occurred: {db_err}")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
-    
-    return None
+    # Save as a single CSV file
+    temp_path = f"{output_path}_temp"
+    transfer_count_df.coalesce(1).write.mode("overwrite").csv(temp_path, header=True)
 
-# Function to write results to a Markdown file
-def write_to_markdown(query_name, results, columns):
-    """Writes query results to a Markdown file"""
-    with open("log.md", "a") as log_file:
-        log_file.write(f"## {query_name}\n\n")
-        log_file.write(f"| {' | '.join(columns)} |\n")
-        separator = "|".join(['-' * (len(col) + 2) for col in columns])
-        log_file.write(f"|{separator}|\n")
-        
-        for row in results:
-            formatted_row = " | ".join(
-                [str(item) if item is not None else "NULL" for item in row]
-            )
-            log_file.write(f"| {formatted_row} |\n")
-        
-        log_file.write("\n")
+    # Rename the output file
+    files = dbutils.fs.ls(temp_path)
+    for file in files:
+        if file.path.endswith(".csv"):
+            dbutils.fs.mv(file.path, final_file)
+            break
 
-# Main function to demonstrate query execution
-def query():
-    """Execute all SQL queries for the Titanic dataset and log results"""
-
-    # Remove existing log.md file if exists
-    if os.path.exists("log.md"):
-        os.remove("log.md")
-
-    # Perform JOIN query
-    logger.info("Performing JOIN query on Titanic and Ports tables...")
-    join_result = execute_query(JOIN_QUERY)
-    if join_result:
-        write_to_markdown(
-            "JOIN Query Result",
-            join_result,
-            ["PassengerId", "Name", "Sex", "Age", "Embarked", "PortName", "Country"]
-        )
-
-    # Perform AGGREGATE query
-    logger.info("Performing AGGREGATE query on Titanic table...")
-    aggregate_result = execute_query(AGGREGATE_QUERY)
-    if aggregate_result:
-        write_to_markdown(
-            "AGGREGATE Query Result",
-            aggregate_result,
-            ["Pclass", "AverageAge"]
-        )
-
-    # Perform SORT query
-    logger.info("Performing SORT query on Titanic table...")
-    sort_result = execute_query(SORT_QUERY)
-    if sort_result:
-        write_to_markdown(
-            "SORT Query Result",
-            sort_result,
-            ["PassengerId", "Name", "Fare"]
-        )
+    # Clean up the temporary directory
+    dbutils.fs.rm(temp_path, recurse=True)
+    print(f"Query results saved as: {final_file}")
 
 if __name__ == "__main__":
-    query()
+    logging.basicConfig(level=logging.INFO)
+    query_data()

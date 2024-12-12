@@ -5,13 +5,13 @@ Check CI/CD Status: [![CI](https://github.com/nogibjj/kim_seijung_project5_sql_c
 #### Author: Seijung Kim (sk591)
 
 ## Project Overview
-This project demonstrates how to create a Databricks Pipeline for ETL (Extract, Transform, Load) pipeline and CRUD querying. The dataset contains information about passengers aboard the Titanic, including personal details such as age, sex, and passenger class, along with their survival status. It is commonly used in data science for practice, providing insights into factors that might influence survival rates.. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
+This project demonstrates how to create a Databricks Pipeline for ETL (Extract, Transform, Load) pipeline and CRUD querying. The dataset contains information about passengers aboard the Titanic, including personal details such as age, sex, and passenger class, along with their survival status. It is commonly used in data science for practice, providing insights into factors that might influence survival rates. It supports basic CRUD (Create, Read, Update, Delete) operations using PySpark DataFrames, enabling efficient data processing for large datasets.
 
 ## Requirements/Deliverables
 * Create a data pipeline using Databricks
 * Include at least one data source and one data sink
-* Databricks notebook or script
-* Document or video demonstrating the pipeline
+* Databricks Python scripts
+* Document demonstrating the pipeline
 
 ## Dataset
 # Titanic Database Schema
@@ -39,6 +39,9 @@ This project uses the Titanic passenger dataset, which is commonly used in data 
 - read: Displays a specified number of records from the DataFrame.
 - update: Updates the artist_name based on PassengerId.
 - delete: Deletes a record from the DataFrame based on PassengerId.
+
+## Databricks Workflow
+
 
 
 ## How to Run the Databricks Pipeline

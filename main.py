@@ -1,22 +1,38 @@
-from mylib.extract import extract
-from mylib.transform_load import load
-from mylib.query import query
+from mylib.log import init_log
+from mylib.transform_load import create_spark, load_data
+from mylib.transform_load import transform_data, save_data, query_data
 
 
 def main():
-    # Extract the dataset
-    print("Extracting data...")
-    dataset_path = extract()  # Extract and get the dataset path
+    # Initialize logging
+    logger = init_log()
+    logger.info("Starting Spark Session...")
 
-    # Load the dataset into Databricks
-    print("Transforming and loading data into Databricks...")
-    load_status = load(dataset_path)
-    print(load_status)
+    # Create Spark session
+    logger.info("Initializing Spark session...")
+    spark = create_spark("TransferETL")
 
-    # Perform queries on the loaded data
-    print("\nPerforming queries and generating log.md...")
-    query()
-    print("Queries executed successfully. Check log.md for results.")
+    # Load data
+    logger.info("Loading data...")
+    data = load_data(spark)
+
+    # Transform data
+    logger.info("Transforming data...")
+    transformed_data = transform_data(data)
+
+    # Save transformed data
+    logger.info("Saving data...")
+    save_data(transformed_data)
+
+    # Query data
+    logger.info("Querying data...")
+    query_results = query_data(transformed_data, spark)
+
+    # Stop Spark session
+    spark.stop()
+    logger.info("Spark session completed!")
+
+    return
 
 
 if __name__ == "__main__":
